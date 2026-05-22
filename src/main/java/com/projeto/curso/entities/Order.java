@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.projeto.curso.entities.enums.OrderStatus;
 
 import jakarta.persistence.CascadeType;
@@ -29,7 +29,8 @@ public class Order implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Instant date;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")	
+	private Instant moment;
 	
 	@ManyToOne
 	@JoinColumn(name = "clientId")
@@ -47,10 +48,10 @@ public class Order implements Serializable{
 		
 	}
 
-	public Order(Long id, Instant date, OrderStatus orderStatus, User client) {
+	public Order(Long id, Instant moment, OrderStatus orderStatus, User client) {
 		super();
 		this.id = id;
-		this.date = date;
+		this.moment = moment;
 		this.client = client;
 		setOrderStatus(orderStatus);
 	}
@@ -63,12 +64,12 @@ public class Order implements Serializable{
 		this.id = id;
 	}
 
-	public Instant getDate() {
-		return date;
+	public Instant getMoment() {
+		return moment;
 	}
 
-	public void setDate(Instant date) {
-		this.date = date;
+	public void setMoment(Instant moment) {
+		this.moment = moment;
 	}
 
 	public Set<OrderItem> getItems (){
@@ -83,6 +84,13 @@ public class Order implements Serializable{
 		this.payment = payment;
 	}
 	
+	public double getTotal() {
+		double sum = 0.0;
+		for (OrderItem x : items){
+			sum += x.getSubTotal();
+		}
+		return sum;
+	}
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -112,7 +120,7 @@ public class Order implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Order [id=" + id + ", date=" + date + "]";
+		return "Order [id=" + id + ", date=" + moment + "]";
 	}
 
 }
